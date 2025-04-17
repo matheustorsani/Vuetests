@@ -277,7 +277,7 @@
                     'robot', 'alien', 'monster', 'vampire', 'zombie', 'detective', 'spy', 'treasure', 'island', 'kingdom',
                     'star', 'death', 'night', 'life', 'light'
                 ];
-                const randomKey = keys[Math.floor(Math.random() * generos.length)]
+                const randomKey = keys[Math.floor(Math.random() * keys.length)]
 
                 const query = await fetch(`https://www.omdbapi.com/?apikey=e1c17332&s=${randomKey}`)
 
