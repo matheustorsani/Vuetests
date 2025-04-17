@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -19,30 +19,70 @@
             color: #333;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.4s ease;
         }
 
         .app {
             background-color: #fff;
+            color: #000;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            transition: background-color 0.4s ease;
+        }
+
+        .app.dark {
+            background-color: #111;
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+
+        }
+
+        .app.dark input,
+        .app.dark button {
+            background-color: #222;
+            color: #fff;
+            border: 1px solid #444;
+        }
+
+        .app.dark li {
+            border-color: #444;
+        }
+
+        .app.dark .movie {
+            color: white;
+        }
+
+        .dark-body {
+            background: #282828;
         }
 
         h1 {
             margin-bottom: 20px;
+            text-align: center;
         }
 
         input[type="text"] {
-            width: calc(100% - 22px);
+            width: 100%;
             padding: 10px;
             margin-bottom: 10px;
+            font-size: 16px;
+            border-radius: 10px;
         }
 
         input[type="button"] {
-            padding: 10px 15px;
-            margin-bottom: 17px;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-right: 6px;
         }
 
         ul {
@@ -50,34 +90,101 @@
         }
 
         li {
-            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .movie {
+            font-size: 18px;
         }
 
         button {
-            margin-left: 10px;
-            padding: 2px 5px;
+            padding: 8px 10px;
+            font-size: 14px;
+            margin-right: 5px;
+            margin-top: 5px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        @media (min-width: 600px) {
+            li {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+            img {
+                width: 60px;
+            }
+
+            button {
+                margin-top: 0;
+            }
+
+            input[type="button"] {
+                width: auto;
+            }
+        }
+
+
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: all 0.3s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .fade-enter-to,
+        .fade-leave-from {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 
 <body>
-    <div class="app">
-        <h1>Filmes favoritos</h1>
-        <input type="text" v-model="filme" placeholder="Adicione um filme">
-        <input type="button" value="Adicionar" @click="adicionarFilme()">
-        <input type="button" value="Procurar" @click="buscar()">
-        <ul>
-            <li v-for="(filmes, index) in filmes" :key="index">
-                <span class="movie" :style="{ fontWeight: filmes.curtido ? 'bold' : 'normal' }">
-                    {{ filmes.nome }} - {{ filmes.curtido ? '❤️' : '💔' }} - Curtidas: 
-                </span>
-                {{ filmes.numCurtido }}
-                <button @click="curtirFilme(index)">
-                    {{ filmes.curtido ? 'Descurtir' : 'Curtir' }}
-                </button>
-                <button @click="removerFilme(index)">Remover</button>
-            </li>
-        </ul>
+    <div id="app">
+        <div :class="['app', { dark: temaEscuro }]">
+            <button @click="alterarTema()">Alterar Tema</button>
+            <h1>Filmes favoritos</h1>
+            <input type="text" v-model="filme" placeholder="Adicione um filme" @keyup.enter="adicionarFilme()">
+            <input class="first" type="button" value="Adicionar" @click="adicionarFilme()">
+            <input type="button" value="Me surpreenda!" @click="filmeAleatorio()"></button>
+            <input type="button" value="Procurar" @click="buscar()">
+            <transition-group name="fade" tag="ul">
+                <li v-for="(filmes, index) in filmes" :key="index">
+                    <img :src="filmes.poster" alt="Poster" style="width: 60px">
+                    <span class="movie"
+                        :style="{ fontWeight: filmes.curtido ? 'bold' : 'normal', color: index === buscaAtiva ? 'orange' : '' }">
+                        {{ filmes.nome }} ({{ filmes.ano }})
+                    </span>
+                    Curtidas: {{ filmes.numCurtido }} {{ filmes.curtido ? "❤️" : "💔"}}
+                    <button @click="curtirFilme(index)">
+                        {{ filmes.curtido ? 'Descurtir' : 'Curtir' }}
+                    </button>
+                    <button @click="removerFilme(index)">Remover</button>
+
+                </li>
+            </transition-group>
+
+        </div>
+
     </div>
 </body>
 <script>
@@ -87,10 +194,14 @@
     createApp({
         data() {
             return {
+                temaEscuro: false,
+                buscaAtiva: null,
                 filme: '',
                 filmes: [
                     {
+                        poster: 'https://m.media-amazon.com/images/M/MV5BM2JiZjU1NmQtNjg1Ni00NjA3LTk2MjMtNjYxMTgxODY0NjRhXkEyXkFqcGc@._V1_SX300.jpg',
                         nome: 'Matrix',
+                        ano: 1993,
                         curtido: false,
                         numCurtido: 56
                     }
@@ -98,19 +209,40 @@
             }
         },
         methods: {
-            adicionarFilme() {
-                if (this.filmes.some(f => f.nome.toLowerCase() === this.filme.trim().toLowerCase())) {
-                    return alert("Este filme já está na lista!");
+            alterarTema() {
+                this.temaEscuro = !this.temaEscuro
+            },
+            async adicionarFilme() {
+                if (this.isNull()) return alert("Insira o nome do filme!")
+
+                try {
+                    const query = await fetch(`https://www.omdbapi.com/?apikey=e1c17332&t=${encodeURIComponent(this.filme)}`)
+                    const res = await query.json();
+
+                    if (this.filmes.find(f =>
+                        f.nome.toLowerCase().includes(this.filme.trim().toLowerCase())
+                    )) return this.buscar();
+
+                    if (res.Error) return alert("Filme não encontrado!")
+                    let curtidas = parseInt(res.imdbVotes.replace(/,/g, '')) || 0
+                
+                    return this.filmes.push({
+                        poster: res.Poster,
+                        nome: res.Title,
+                        ano: res.Year,
+                        curtido: false,
+                        numCurtido: curtidas
+                    });
+                } catch (error) {
+                    console.error(error.message);
                 }
-                if (!this.isNull()) {
-                    this.filmes.push({ nome: this.filme.trim(), curtido: false, numCurtido: 0 });
-                    return this.filme = '';
-                }
-                alert("Insira o nome do filme!")
+
+                return this.filme = '';
+
             },
             curtirFilme(index) {
-                if (!this.filmes[index].curtido) { 
-                    this.filmes[index].curtido = true; 
+                if (!this.filmes[index].curtido) {
+                    this.filmes[index].curtido = true;
                     return this.filmes[index].numCurtido++
                 }
                 this.filmes[index].curtido = false
@@ -120,26 +252,70 @@
                 this.filmes.splice(index, 1);
             },
             buscar() {
-                const movies = document.querySelectorAll(".movie")
-
-                if (this.isNull()) {
-                    return alert("Insira o nome do filme para buscar!");
-                }
-                const movie = Array.from(movies).find(m => 
-                    m.textContent.toLowerCase().includes(this.filme.trim().toLowerCase())
+                if (this.isNull()) return alert("Insira o titulo do filme para procurar!")
+                const idx = this.filmes.findIndex(f =>
+                    f.nome.toLowerCase().includes(this.filme.trim().toLowerCase())
                 );
-                if (movie) {
-                    alert(`Filme encontrado: ${movie.textContent.split(' - ')[0]}`);
-                    movie.style.color = 'yellow';
+                if (idx !== -1) {
+                    this.buscaAtiva = idx;
+                    alert(`Filme encontrado: ${this.filmes[idx].nome}`);
                 } else {
+                    this.buscaAtiva = null;
                     alert("Filme não encontrado!");
                 }
+                setTimeout(() => this.buscaAtiva = null, 2000);
             },
             isNull() {
                 return this.filme.trim() == "" ? true : false
+            },
+            async filmeAleatorio() {
+                const keys = [
+                    'the', 'batman', 'dark', 'love', 'war', 'hero', 'space', 'dream', 'legend', 'mystery',
+                    'adventure', 'fantasy', 'thriller', 'comedy', 'drama', 'horror', 'action', 'romance', 'crime', 'sci-fi',
+                    'animation', 'family', 'history', 'biography', 'western', 'musical', 'sport', 'documentary', 'noir', 'supernatural',
+                    'revenge', 'survival', 'friendship', 'betrayal', 'power', 'magic', 'journey', 'destiny', 'future', 'past',
+                    'robot', 'alien', 'monster', 'vampire', 'zombie', 'detective', 'spy', 'treasure', 'island', 'kingdom',
+                    'star', 'death', 'night', 'life', 'light'
+                ];
+                const randomKey = keys[Math.floor(Math.random() * generos.length)]
+
+                const query = await fetch(`https://www.omdbapi.com/?apikey=e1c17332&s=${randomKey}`)
+
+                const res = await query.json()
+
+                const randomIndex = () => Math.floor(Math.random() * res.Search.length)
+                const filmeAleatorio = res.Search[randomIndex()]
+                if (this.filmes.find(f =>
+                    f.nome.toLowerCase().includes(filmeAleatorio.Title.trim().toLowerCase())
+                )) return randomIndex();
+
+                this.filme = filmeAleatorio.Title
+                return this.adicionarFilme()
+            }
+        },
+        mounted() {
+            const filmesSalvos = localStorage.getItem('filmes')
+            const tema = localStorage.getItem('tema')
+            if (filmesSalvos) this.filmes = JSON.parse(filmesSalvos)
+            if (tema) this.temaEscuro = JSON.parse(tema)
+
+        },
+        watch: {
+            temaEscuro: {
+                handler(temaEscuro) {
+                    localStorage.setItem('tema', JSON.stringify(temaEscuro))
+                    document.body.classList.toggle('dark-body', temaEscuro)
+                },
+                deep: true
+            },
+            filmes: {
+                handler(newMv) {
+                    localStorage.setItem('filmes', JSON.stringify(newMv))
+                },
+                deep: true
             }
         }
-    }).mount('.app')
+    }).mount('#app')
 </script>
 
 </html>
