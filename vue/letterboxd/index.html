@@ -26,7 +26,7 @@
                         {{ filmes.nome }} ({{ filmes.ano }})
                     </span>
                     Curtidas: {{ filmes.numCurtido }} {{ filmes.curtido ? "❤️" : "💔"}}
-                    <button @click="curtirFilme(index)">
+                    <button class="like" @click="curtirFilme(index)">
                         {{ filmes.curtido ? 'Descurtir' : 'Curtir' }}
                     </button>
                     <button @click="removerFilme(index)">Remover</button>

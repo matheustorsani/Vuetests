@@ -36,14 +36,19 @@ createApp({
 
                 if (res.Error) return alert("Filme não encontrado!")
                 let curtidas = parseInt(res.imdbVotes.replace(/,/g, '')) || 0
-
-                return this.filmes.push({
+                
+                this.filmes.push({
                     poster: res.Poster,
                     nome: res.Title,
                     ano: res.Year,
                     curtido: false,
                     numCurtido: curtidas
                 });
+                this.$nextTick(() => {
+                    const ultimo = this.filmesRefs[this.filmes.length - 1];
+                    if (ultimo) ultimo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                
             } catch (error) {
                 console.error(error.message);
             }
@@ -97,21 +102,36 @@ createApp({
                 'robot', 'alien', 'monster', 'vampire', 'zombie', 'detective', 'spy', 'treasure', 'island', 'kingdom',
                 'star', 'death', 'night', 'life', 'light'
             ];
-            const randomKey = keys[Math.floor(Math.random() * keys.length)]
 
-            const query = await fetch(`https://www.omdbapi.com/?apikey=e1c17332&s=${randomKey}`)
+            for (let i = 0; i < 10; i++) {
+                const randomKey = keys[Math.floor(Math.random() * keys.length)];
+                const query = await fetch(`https://www.omdbapi.com/?apikey=e1c17332&s=${randomKey}`);
+                const res = await query.json();
 
-            const res = await query.json()
+                if (!res.Search || res.Search.length === 0) continue;
 
-            const randomIndex = () => Math.floor(Math.random() * res.Search.length)
-            const filmeAleatorio = res.Search[randomIndex()]
-            if (this.filmes.find(f =>
-                f.nome.toLowerCase().includes(filmeAleatorio.Title.trim().toLowerCase())
-            )) return randomIndex();
+                const filmeSorteado = res.Search[Math.floor(Math.random() * res.Search.length)];
 
-            this.filme = filmeAleatorio.Title
-            return this.adicionarFilme()
+                const detalhesQuery = await fetch(`https://www.omdbapi.com/?apikey=e1c17332&t=${encodeURIComponent(filmeSorteado.Title)}`);
+                const detalhes = await detalhesQuery.json();
+
+                const jaTem = this.filmes.find(f => f.nome.toLowerCase() === detalhes.Title.toLowerCase());
+                if (!jaTem) {
+                    let curtidas = parseInt(detalhes.imdbVotes.replace(/,/g, '')) || 0;
+                    this.filmes.push({
+                        poster: detalhes.Poster,
+                        nome: detalhes.Title,
+                        ano: detalhes.Year,
+                        curtido: false,
+                        numCurtido: curtidas
+                    });
+                    return;
+                }
+            }
+
+            alert("Não consegui achar um filme novo 😓");
         }
+
     },
     mounted() {
         const filmesSalvos = localStorage.getItem('filmes')
