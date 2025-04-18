@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+        <h1>Pokedex</h1>
+        <input type="text" v-model="nomePokemon" placeholder="Digite um nome ou numero" @keyup.enter="buscarPokemon()">
+        <button @click="buscarPokemon()">Buscar</button>
+        <div class="favoritos" v-if="favorito.length > 0">
+            <h3>Favoritos</h3>
+            <ul>
+                <li v-for="poke in favorito" :key="poke.id">
+                    <img :src="poke.imagem" :alt="poke.nome" width="50">
+                    <a @click="buscarPokemon(poke.id)">{{ poke.nome }}</a>
+                </li>
+            </ul>
+        </div>
+        
+        <span class="loading" v-if="loading">Carregando...</span>
+        <div class="pokemon" v-if="pokemon && !loading && pokemon.sprites">
+            <h2>{{ pokemon.name }}</h2>
+            <img :src="pokemon.sprites.front_default" alt="Pokemon">
+            <p>Altura: {{ pokemon.height }}cm</p>
+            <p>Peso: {{ pokemon.weight }}kg</p>
+            <p>Tipo:
+                <span v-for="tipo in pokemon.types" :key="tipo.type.name" :style="{ color: tipoCor(tipo.type.name), fontWeight: 'bold' }">
+                    {{ tipo.type.name }}<span v-if="pokemon.types.indexOf(tipo) !== pokemon.types.length - 1">, </span>
+                </span>
+            </p>
+            <ul>
+                <p style="font-weight: bold;">Status Iniciais</p>
+                <li>
+                    Vida: {{ pokemon.stats[0].base_stat }}
+                    <div class="progress-bar">
+                        <div class="progress" :style="{ width: pokemon.stats[0].base_stat + '%', backgroundColor: '#0f0' }"></div>
+                    </div>
+                </li>
+                <li>
+                    Ataque: {{ pokemon.stats[1].base_stat }}
+                    <div class="progress-bar">
+                        <div class="progress" :style="{ width: pokemon.stats[1].base_stat + '%', backgroundColor: '#f00' }"></div>
+                    </div>
+                </li>
+                <li>
+                    Defesa: {{ pokemon.stats[2].base_stat }}
+                    <div class="progress-bar">
+                        <div class="progress" :style="{ width: pokemon.stats[2].base_stat + '%', backgroundColor: '#00f' }"></div>
+                    </div>
+                </li>
+                <li>
+                    Ataque Especial: {{ pokemon.stats[3].base_stat }}
+                    <div class="progress-bar">
+                        <div class="progress" :style="{ width: pokemon.stats[3].base_stat + '%', backgroundColor: '#f00' }"></div>
+                    </div>
+                </li>
+                <li>
+                    Defesa Especial: {{ pokemon.stats[4].base_stat }}
+                    <div class="progress-bar">
+                        <div class="progress" :style="{ width: pokemon.stats[4].base_stat + '%', backgroundColor: '#00f' }"></div>
+                    </div>
+                </li>
+            </ul>
+            <button @click="favoritar()">Favoritar</button>
+        </div>
+        <div v-if="pokemon && !loading && pokemon.sprites">
+            <button class="first" @click="navegarPokemon(-1)" >Anterior</button>
+            <button @click="navegarPokemon(1)">Proximo</button>
+        </div>
+    </div>
+</body>
+<script src="script.js"></script>
+
+</html>
