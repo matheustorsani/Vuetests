@@ -14,10 +14,20 @@
         <h1>Pokedex</h1>
         <input type="text" v-model="nomePokemon" placeholder="Digite um nome ou numero" @keyup.enter="buscarPokemon()">
         <button @click="buscarPokemon()">Buscar</button>
+        <button @click="todosPokemons(nomePokemon)">Varios Pokemons!</button>
         <div class="favoritos" v-if="favorito.length > 0">
             <h3>Favoritos</h3>
             <ul>
                 <li v-for="poke in favorito" :key="poke.id">
+                    <img :src="poke.imagem" :alt="poke.nome" width="50">
+                    <a @click="buscarPokemon(poke.id)">{{ poke.nome }}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="varios favoritos" v-if="varios.length > 0">
+            <h3>Diversos Pokemons!</h3>
+            <ul>
+                <li v-for="poke in varios" :key="poke.id">
                     <img :src="poke.imagem" :alt="poke.nome" width="50">
                     <a @click="buscarPokemon(poke.id)">{{ poke.nome }}</a>
                 </li>

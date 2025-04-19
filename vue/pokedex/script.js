@@ -7,7 +7,8 @@ createApp({
             nomePokemon: '',
             pokemon: null,
             loading: false,
-            favorito: []
+            favorito: [],
+            varios: []
         }
     },
     methods: {
@@ -29,7 +30,7 @@ createApp({
                 this.nomePokemon = '';
                 this.$nextTick(() => {
                     document.querySelector('input[type="text"]').focus();
-                });                
+                });
             } catch (err) {
                 alert(err.message)
                 this.pokemon = null;
@@ -75,6 +76,29 @@ createApp({
                 nome: this.pokemon.name,
                 imagem: this.pokemon.sprites.front_default
             });
+        },
+        async todosPokemons(num) {
+            if (!parseInt(num) || num < 0) return alert("Por favor, insira um número inteiro.");
+
+
+            this.varios = [];
+            const jaBuscados = new Set();
+
+            while (this.varios.length < num) {
+                const randomId = Math.floor(Math.random() * 898) + 1;
+                if (jaBuscados.has(randomId)) continue;
+
+                jaBuscados.add(randomId);
+                const query = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+                const res = await query.json();
+
+                this.varios.push({
+                    id: res.id,
+                    nome: res.name,
+                    imagem: res.sprites.front_default
+                });
+            }
+            this.loading = false
         }
     },
     watch: {
@@ -89,7 +113,7 @@ createApp({
                 localStorage.setItem("favoritos", JSON.stringify(favorito))
             },
             deep: true
-        }
+        },
     },
     mounted() {
         const ultimoPokemon = localStorage.getItem("pokemon")
