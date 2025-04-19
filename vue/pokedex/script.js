@@ -98,7 +98,7 @@ createApp({
         if (ultimoPokemon) {
             try {
                 const parse = JSON.parse(ultimoPokemon);
-                if (parse && parse.sprites && parse.sprites.front_default) {
+                if (parse && parse.sprites && parse.sprites.other.showdown.front_default) {
                     this.pokemon = parse;
                 }
             } catch (e) {
