@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "@vue/tsconfig": "^0.7.0",
+    "sass-embedded": "^1.87.0"
+  }
+}
